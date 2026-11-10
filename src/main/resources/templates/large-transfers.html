@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Large Transfers</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>Large Transfers</h1>
+
+        <form method="get" action="/large-transfers">
+            <label>Minimum Amount (LKR):</label>
+            <input type="number" name="min" th:value="${min}" min="0" step="0.01" required>
+            <button type="submit">Search</button>
+        </form>
+
+        <h3>
+            Transfers above LKR
+            <span th:text="${min}"></span>
+        </h3>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>From Account</th>
+                    <th>To Account</th>
+                    <th>Amount (LKR)</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr th:each="transaction : ${largeTransfers}">
+                    <td th:text="${transaction.id}"></td>
+                    <td th:text="${transaction.fromAccount}"></td>
+                    <td th:text="${transaction.toAccount}"></td>
+                    <td th:text="${transaction.amount}"></td>
+                    <td th:text="${transaction.status}"></td>
+                    <td th:text="${transaction.createdAt}"></td>
+                </tr>
+
+                <tr th:if="${#lists.isEmpty(largeTransfers)}">
+                    <td colspan="6">No large transfers found.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <a th:href="@{/}">Back to Dashboard</a>
+    </div>
+
+</body>
+
+</html>
