@@ -1,107 +1,122 @@
-
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Transaction History</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
+
 <body>
 
-<div class="container">
+    <div class="container">
 
-    <header class="page-header">
-        <h1>Transaction History</h1>
-        <p>View account transaction details.</p>
-    </header>
+        <header class="page-header">
+            <h1>Transaction History</h1>
+            <p>View account transaction details.</p>
+        </header>
 
-    <!-- Customer Information -->
-    <section class="section" th:if="${customer != null}">
+        <!-- Customer Information -->
+        <section class="section" th:if="${customer != null}">
 
-        <h2>Customer Details</h2>
+            <h2>Customer Details</h2>
 
-        <div class="customer-details">
-            <p>
-                <strong>Name:</strong>
-                <span th:text="${customer.fullName}"></span>
-            </p>
+            <div class="customer-details">
+                <p>
+                    <strong>Name:</strong>
+                    <span th:text="${customer.fullName}"></span>
+                </p>
 
-            <p>
-                <strong>Email:</strong>
-                <span th:text="${customer.email}"></span>
-            </p>
+                <p>
+                    <strong>Email:</strong>
+                    <span th:text="${customer.email}"></span>
+                </p>
 
-            <p>
-                <strong>Account Number:</strong>
-                <span th:text="${customer.accountNumber}"></span>
-            </p>
+                <p>
+                    <strong>Account Number:</strong>
+                    <span th:text="${customer.accountNumber}"></span>
+                </p>
 
-            <p>
-                <strong>Current Balance:</strong>
-                <span th:text="${customer.balance}"></span>
-            </p>
-        </div>
+                <p>
+                    <strong>Current Balance:</strong>
+                    <span th:text="${customer.balance}"></span>
+                </p>
+            </div>
 
-    </section>
+        </section>
 
-    <section class="section" th:if="${customer == null}">
-        <p class="error-message">Customer account not found.</p>
-    </section>
+        <section class="section" th:if="${customer == null}">
+            <p class="error-message">Customer account not found.</p>
+        </section>
+        <!-- Total Amount Sent -->
+        <section class="section" th:if="${customer != null}">
 
-    <!-- Transaction History Table -->
-    <section class="section">
+            <h2>Total Amount Sent</h2>
 
-        <h2>All Transactions</h2>
+            <div class="customer-details">
+                <p>
+                    <strong>Total Successful Transfers:</strong>
+                    LKR <span th:text="${totalAmountSent}">0.00</span>
+                </p>
+            </div>
 
-        <div class="table-container">
-            <table>
-                <thead>
-                <tr>
-                    <th>Transaction ID</th>
-                    <th>From Account</th>
-                    <th>To Account</th>
-                    <th>Amount</th>
-                    <th>Status</th>
-                    <th>Description</th>
-                    <th>Date</th>
-                </tr>
-                </thead>
+        </section>
 
-                <tbody>
-                <tr th:each="transaction : ${transactions}">
+        <!-- Transaction History Table -->
+        <section class="section">
 
-                    <td th:text="${transaction.id}"></td>
-                    <td th:text="${transaction.fromAccount}"></td>
-                    <td th:text="${transaction.toAccount}"></td>
-                    <td th:text="${transaction.amount}"></td>
+            <h2>All Transactions</h2>
 
-                    <td>
-                        <span th:text="${transaction.status}"
-                              th:class="${transaction.status.name() == 'SUCCESS'} ? 'status-success' : 'status-failed'">
-                        </span>
-                    </td>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Transaction ID</th>
+                            <th>From Account</th>
+                            <th>To Account</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Description</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
 
-                    <td th:text="${transaction.description}"></td>
-                    <td th:text="${transaction.createdAt}"></td>
+                    <tbody>
+                        <tr th:each="transaction : ${transactions}">
 
-                </tr>
+                            <td th:text="${transaction.id}"></td>
+                            <td th:text="${transaction.fromAccount}"></td>
+                            <td th:text="${transaction.toAccount}"></td>
+                            <td th:text="${transaction.amount}"></td>
 
-                <tr th:if="${#lists.isEmpty(transactions)}">
-                    <td colspan="7">No transaction history available.</td>
-                </tr>
+                            <td>
+                                <span th:text="${transaction.status}"
+                                    th:class="${transaction.status.name() == 'SUCCESS'} ? 'status-success' : 'status-failed'">
+                                </span>
+                            </td>
 
-                </tbody>
-            </table>
-        </div>
+                            <td th:text="${transaction.description}"></td>
+                            <td th:text="${transaction.createdAt}"></td>
 
-        <a th:href="@{/}" class="secondary-button back-button">
-            Back to Dashboard
-        </a>
+                        </tr>
 
-    </section>
+                        <tr th:if="${#lists.isEmpty(transactions)}">
+                            <td colspan="7">No transaction history available.</td>
+                        </tr>
 
-</div>
+                    </tbody>
+                </table>
+            </div>
+
+            <a th:href="@{/}" class="secondary-button back-button">
+                Back to Dashboard
+            </a>
+
+        </section>
+
+    </div>
 
 </body>
+
 </html>

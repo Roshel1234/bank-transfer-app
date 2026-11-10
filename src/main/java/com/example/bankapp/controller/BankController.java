@@ -10,7 +10,6 @@ import com.example.bankapp.repository.CustomerRepository;
 import com.example.bankapp.repository.BankTransactionRepository;
 
 import jakarta.validation.Valid;
-
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Controller;
@@ -19,6 +18,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Controller
@@ -30,7 +30,6 @@ public class BankController {
     private final CustomerRepository customerRepository;
     private final BankTransactionRepository transactionRepository;
 
-  
     @GetMapping("/")
     public String home(
             @RequestParam(required = false) String search,
@@ -52,32 +51,26 @@ public class BankController {
         model.addAttribute("latestTransactions",
                 transactionRepository.findAllLatest());
         model.addAttribute("successCount",
-                transactionRepository.countByStatus(
-                        TransactionStatus.SUCCESS));
+                transactionRepository.countByStatus(TransactionStatus.SUCCESS));
         model.addAttribute("failedCount",
-                transactionRepository.countByStatus(
-                        TransactionStatus.FAILED));
+                transactionRepository.countByStatus(TransactionStatus.FAILED));
         model.addAttribute("transferRequest", new TransferRequest());
 
         return "bank";
     }
 
-    
     @PostMapping("/customers")
     public String createCustomer(
             @ModelAttribute Customer customer,
             RedirectAttributes redirectAttributes) {
 
-        if (customerRepository.countAccounts(
-                customer.getAccountNumber()) > 0) {
-
+        if (customerRepository.countAccounts(customer.getAccountNumber()) > 0) {
             redirectAttributes.addFlashAttribute(
                     "error", "Account number already exists");
             return "redirect:/";
         }
 
         if (customerRepository.countEmails(customer.getEmail()) > 0) {
-
             redirectAttributes.addFlashAttribute(
                     "error", "Email already exists");
             return "redirect:/";
@@ -91,11 +84,9 @@ public class BankController {
         return "redirect:/";
     }
 
-    
     @PostMapping("/transfer")
     public String transfer(
-            @Valid @ModelAttribute("transferRequest")
-            TransferRequest request,
+            @Valid @ModelAttribute("transferRequest") TransferRequest request,
             BindingResult bindingResult,
             RedirectAttributes redirectAttributes) {
 
@@ -106,25 +97,21 @@ public class BankController {
         }
 
         try {
-
             bankService.transfer(
                     request.getFromAccount(),
                     request.getToAccount(),
                     request.getAmount(),
-                    request.isSimulateFailure()
-            );
+                    request.isSimulateFailure());
 
             redirectAttributes.addFlashAttribute(
                     "success", "Transfer completed successfully");
 
         } catch (Exception e) {
-
             auditService.recordFailedTransfer(
                     request.getFromAccount(),
                     request.getToAccount(),
                     request.getAmount(),
-                    e.getMessage()
-            );
+                    e.getMessage());
 
             redirectAttributes.addFlashAttribute(
                     "error", e.getMessage());
@@ -133,7 +120,46 @@ public class BankController {
         return "redirect:/";
     }
 
-   
+    @PostMapping("/deposit")
+    public String deposit(
+            @RequestParam String accountNumber,
+            @RequestParam BigDecimal amount,
+            RedirectAttributes redirectAttributes) {
+
+        try {
+            bankService.deposit(accountNumber, amount);
+
+            redirectAttributes.addFlashAttribute(
+                    "success", "Deposit completed successfully");
+
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute(
+                    "error", e.getMessage());
+        }
+
+        return "redirect:/";
+    }
+
+    @PostMapping("/withdraw")
+    public String withdraw(
+            @RequestParam String accountNumber,
+            @RequestParam BigDecimal amount,
+            RedirectAttributes redirectAttributes) {
+
+        try {
+            bankService.withdraw(accountNumber, amount);
+
+            redirectAttributes.addFlashAttribute(
+                    "success", "Withdrawal completed successfully");
+
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute(
+                    "error", e.getMessage());
+        }
+
+        return "redirect:/";
+    }
+
     @GetMapping("/accounts/{accountNumber}/history")
     public String accountHistory(
             @PathVariable String accountNumber,
@@ -148,6 +174,23 @@ public class BankController {
         model.addAttribute("transactions",
                 transactionRepository.findHistory(accountNumber));
 
+        model.addAttribute("totalAmountSent",
+                transactionRepository.getTotalAmountSent(accountNumber));
+
         return "history";
+    }
+
+    // Task 12.1: Display large transfers
+    @GetMapping("/large-transfers")
+    public String largeTransfers(
+            @RequestParam(defaultValue = "10000") BigDecimal min,
+            Model model) {
+
+        model.addAttribute("largeTransfers",
+                transactionRepository.findLargeTransfers(min));
+
+        model.addAttribute("min", min);
+
+        return "large-transfers";
     }
 }
